@@ -29,7 +29,7 @@ background_image = pygame.image.load("game_background.jpg")
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Load background music
-pygame.mixer.music.load("game_background.mp3")  # Use your audio file here
+pygame.mixer.music.load("game_background.mp3")
 pygame.mixer.music.set_volume(0.5)  # Set volume (0.0 to 1.0)
 pygame.mixer.music.play(-1)  # Loop the music indefinitely
 
@@ -132,7 +132,6 @@ def game_screen():
                 sys.exit()
 
         pygame.display.flip()  # Update display
-
 
 # Start the menu, then the game
 main_menu()
