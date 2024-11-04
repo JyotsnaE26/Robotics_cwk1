@@ -6,10 +6,10 @@ pygame.init()
 # Screen dimensions and colors
 SCREEN_WIDTH, SCREEN_HEIGHT = 900, 473
 FONT_COLOR = (255, 255, 255)
-BUTTON_COLOR = (255, 100, 50)  # Warm reddish-orange button color
-BUTTON_HOVER_COLOR = (255, 70, 30)  # Darker red-orange for hover effect
-BUTTON_CLICK_COLOR = (200, 50, 20)  # Even darker color for click effect
-BUTTON_SHADOW_COLOR = (100, 50, 20)  # Shadow color
+BUTTON_COLOR = (255, 100, 50)
+BUTTON_HOVER_COLOR = (255, 70, 30)
+BUTTON_CLICK_COLOR = (200, 50, 20)
+BUTTON_SHADOW_COLOR = (100, 50, 20)
 BUTTON_WIDTH, BUTTON_HEIGHT = 200, 60
 
 # Version and developer info
@@ -30,8 +30,11 @@ background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREE
 
 # Load background music
 pygame.mixer.music.load("game_background.mp3")
-pygame.mixer.music.set_volume(0.5)  # Set volume (0.0 to 1.0)
-pygame.mixer.music.play(-1)  # Loop the music indefinitely
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+
+# Load button click sound effect
+click_sound = pygame.mixer.Sound("button-click.mp3")
 
 # Function to draw text on the screen
 def draw_text(text, pos, color=FONT_COLOR, font=font):
@@ -68,7 +71,7 @@ def draw_button(text, pos, mouse_pos, mouse_click):
 def main_menu():
     menu_running = True
     while menu_running:
-        screen.blit(background_image, (0, 0))  # Draw the background image
+        screen.blit(background_image, (0, 0))
 
         # Draw version info at the extreme left
         draw_text(VERSION_TEXT, (10, 10), (180, 180, 180), small_font)
@@ -83,11 +86,13 @@ def main_menu():
         # Draw Start button and check if clicked
         start_button = draw_button("Start Game", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50), mouse_pos, mouse_click)
         if start_button.collidepoint(mouse_pos) and mouse_click[0]:
+            click_sound.play()  # Play sound on click
             game_screen()  # Open game screen when Start Game is clicked
 
         # Draw Quit button and check if clicked
         quit_button = draw_button("Quit", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50), mouse_pos, mouse_click)
         if quit_button.collidepoint(mouse_pos) and mouse_click[0]:
+            click_sound.play()  # Play sound on click
             pygame.quit()
             sys.exit()  # Exit the game when clicked
 
@@ -97,13 +102,13 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
 
-        pygame.display.flip()  # Update display
+        pygame.display.flip()
 
 # Game screen function with "Camera Capture," "Image Upload," and "Exit" buttons
 def game_screen():
     game_running = True
     while game_running:
-        screen.blit(background_image, (0, 0))  # Draw the background image
+        screen.blit(background_image, (0, 0))
 
         # Get mouse position and button press
         mouse_pos = pygame.mouse.get_pos()
@@ -112,16 +117,19 @@ def game_screen():
         # Draw Camera Capture button and check if clicked
         camera_button = draw_button("Camera", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 70), mouse_pos, mouse_click)
         if camera_button.collidepoint(mouse_pos) and mouse_click[0]:
+            click_sound.play()  # Play sound on click
             print("Camera Capture selected")  # Placeholder action for Camera Capture
 
         # Draw Image Upload button and check if clicked
         upload_button = draw_button("Image", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), mouse_pos, mouse_click)
         if upload_button.collidepoint(mouse_pos) and mouse_click[0]:
+            click_sound.play()  # Play sound on click
             print("Image Upload selected")  # Placeholder action for Image Upload
 
         # Draw Exit button and check if clicked
         exit_button = draw_button("Exit", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 70), mouse_pos, mouse_click)
         if exit_button.collidepoint(mouse_pos) and mouse_click[0]:
+            click_sound.play()  # Play sound on click
             pygame.quit()
             sys.exit()  # Exit the game when Exit is clicked
 
@@ -131,7 +139,7 @@ def game_screen():
                 pygame.quit()
                 sys.exit()
 
-        pygame.display.flip()  # Update display
+        pygame.display.flip()
 
 # Start the menu, then the game
 main_menu()
