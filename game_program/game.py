@@ -20,37 +20,37 @@ DEVELOPER_NOTES = "Developed by BOT_MATRIX"
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("UNO Cards By BOT_MATRIX")
 
-# Load font
+# Load fonts
 font = pygame.font.Font(None, 48)
 small_font = pygame.font.Font(None, 24)
 
-# Load and scale background image
+# Load background image and scale it
 background_image = pygame.image.load("game_background.jpg")
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# Load background music
+# Load sounds and music
 pygame.mixer.music.load("game_background.mp3")
 pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.play(-1)
-
-# Load button click sound effect
 click_sound = pygame.mixer.Sound("button-click.mp3")
+transition_sound = pygame.mixer.Sound("transition.wav")
+
+# Play background music
+pygame.mixer.music.play(-1)
 
 # Function to draw text on the screen
 def draw_text(text, pos, color=FONT_COLOR, font=font):
     rendered_text = font.render(text, True, color)
     screen.blit(rendered_text, pos)
 
-# Button setup
-def draw_button(text, pos, mouse_pos, mouse_click):
+# Function to handle button drawing and hover states
+def draw_button(text, pos, mouse_pos, is_clicked):
     button_rect = pygame.Rect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
     button_rect.center = pos
 
     # Check hover and click state
-    if button_rect.collidepoint(mouse_pos):
-        color = BUTTON_CLICK_COLOR if mouse_click[0] else BUTTON_HOVER_COLOR
-    else:
-        color = BUTTON_COLOR
+    color = BUTTON_HOVER_COLOR if button_rect.collidepoint(mouse_pos) else BUTTON_COLOR
+    if is_clicked and button_rect.collidepoint(mouse_pos):
+        color = BUTTON_CLICK_COLOR
 
     # Draw shadow for button
     shadow_rect = button_rect.copy()
@@ -67,77 +67,101 @@ def draw_button(text, pos, mouse_pos, mouse_click):
 
     return button_rect
 
+# Function for fading the screen
+def fade_out(duration=1000):
+    fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    fade_surface.fill((0, 0, 0))
+    for alpha in range(0, 255):
+        fade_surface.set_alpha(alpha)
+        screen.blit(background_image, (0, 0))
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.update()
+        pygame.time.delay(duration // 255)
+
+def fade_in(duration=1000):
+    fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    fade_surface.fill((0, 0, 0))
+    for alpha in range(255, -1, -1):
+        fade_surface.set_alpha(alpha)
+        screen.blit(background_image, (0, 0))
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.update()
+        pygame.time.delay(duration // 255)
+
 # Main menu function
 def main_menu():
     menu_running = True
     while menu_running:
         screen.blit(background_image, (0, 0))
 
-        # Draw version info at the extreme left
+        # Draw version and developer info
         draw_text(VERSION_TEXT, (10, 10), (180, 180, 180), small_font)
-
-        # Draw developer notes at the bottom corner
         draw_text(DEVELOPER_NOTES, (10, SCREEN_HEIGHT - 30), (180, 180, 180), small_font)
 
-        # Get mouse position and button press
+        # Get mouse position
         mouse_pos = pygame.mouse.get_pos()
-        mouse_click = pygame.mouse.get_pressed()
+        is_clicked = False
 
-        # Draw Start button and check if clicked
-        start_button = draw_button("Start Game", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50), mouse_pos, mouse_click)
-        if start_button.collidepoint(mouse_pos) and mouse_click[0]:
-            click_sound.play()  # Play sound on click
-            game_screen()  # Open game screen when Start Game is clicked
-
-        # Draw Quit button and check if clicked
-        quit_button = draw_button("Quit", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50), mouse_pos, mouse_click)
-        if quit_button.collidepoint(mouse_pos) and mouse_click[0]:
-            click_sound.play()  # Play sound on click
-            pygame.quit()
-            sys.exit()  # Exit the game when clicked
-
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                is_clicked = True  # Only register a click on MOUSEBUTTONDOWN
+
+        # Draw buttons and handle clicks
+        start_button = draw_button("Start Game", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50), mouse_pos, is_clicked)
+        if start_button.collidepoint(mouse_pos) and is_clicked:
+            click_sound.play()
+            fade_out(700)
+            transition_sound.play()
+            fade_in(700)
+            game_screen()  # Transition to game screen
+
+        quit_button = draw_button("Quit", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50), mouse_pos, is_clicked)
+        if quit_button.collidepoint(mouse_pos) and is_clicked:
+            click_sound.play()
+            fade_out(700)
+            pygame.quit()
+            sys.exit()
 
         pygame.display.flip()
 
-# Game screen function with "Camera Capture," "Image Upload," and "Exit" buttons
+# Game screen with transition effect
 def game_screen():
     game_running = True
     while game_running:
         screen.blit(background_image, (0, 0))
 
-        # Get mouse position and button press
+        # Get mouse position
         mouse_pos = pygame.mouse.get_pos()
-        mouse_click = pygame.mouse.get_pressed()
+        is_clicked = False
 
-        # Draw Camera Capture button and check if clicked
-        camera_button = draw_button("Camera", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 70), mouse_pos, mouse_click)
-        if camera_button.collidepoint(mouse_pos) and mouse_click[0]:
-            click_sound.play()  # Play sound on click
-            print("Camera Capture selected")  # Placeholder action for Camera Capture
-
-        # Draw Image Upload button and check if clicked
-        upload_button = draw_button("Image", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), mouse_pos, mouse_click)
-        if upload_button.collidepoint(mouse_pos) and mouse_click[0]:
-            click_sound.play()  # Play sound on click
-            print("Image Upload selected")  # Placeholder action for Image Upload
-
-        # Draw Exit button and check if clicked
-        exit_button = draw_button("Exit", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 70), mouse_pos, mouse_click)
-        if exit_button.collidepoint(mouse_pos) and mouse_click[0]:
-            click_sound.play()  # Play sound on click
-            pygame.quit()
-            sys.exit()  # Exit the game when Exit is clicked
-
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                is_clicked = True  # Only register a click on MOUSEBUTTONDOWN
+
+        # Draw buttons and handle clicks
+        camera_button = draw_button("Camera", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 70), mouse_pos, is_clicked)
+        if camera_button.collidepoint(mouse_pos) and is_clicked:
+            click_sound.play()
+            print("Camera Capture selected")
+
+        upload_button = draw_button("Image", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), mouse_pos, is_clicked)
+        if upload_button.collidepoint(mouse_pos) and is_clicked:
+            click_sound.play()
+            print("Image Upload selected")
+
+        exit_button = draw_button("Back", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 70), mouse_pos, is_clicked)
+        if exit_button.collidepoint(mouse_pos) and is_clicked:
+            click_sound.play()
+            fade_out(700)
+            transition_sound.play()
+            fade_in(700)
+            main_menu()
 
         pygame.display.flip()
 
