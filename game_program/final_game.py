@@ -1,7 +1,6 @@
 import pygame
 import sys
 
-# Constants for game configuration
 GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT = 900, 473
 FONT_COLOR = (255, 255, 255)
 BUTTON_COLOR = (255, 100, 50)
