@@ -1,7 +1,13 @@
 import cv2
 import pygame
 import sys
+import tkinter as tk
+from tkinter import filedialog
 from ultralytics import YOLO
+
+# Initialize tkinter for file dialog
+root = tk.Tk()
+root.withdraw()  # Hide the tkinter root window
 
 # Constants
 GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT = 900, 473
@@ -15,13 +21,14 @@ BUTTON_SHADOW_COLOR = (100, 50, 20)
 card_types = {5: "0", 6: "1", 7: "2", 8: "3", 9: "4", 10: "5", 11: "6", 12: "7", 13: "8", 14: "9", 16: "Reverse", 17: "Skip", 18: "Wild", 19: "Wild Draw 4"}
 card_colors = {1: "Black", 2: "Blue", 4: "Green", 15: "Red", 20: "Yellow"}
 
+
 class CameraCapture:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
 
     def detect_cards(self, image):
         results = self.model(image)
-        detected_labels = []  # List to store all detected card labels
+        detected_labels = []
 
         for result in results:
             for box in result.boxes:
@@ -34,21 +41,18 @@ class CameraCapture:
             
                 card_label = f"{color} {card_type}" if color and card_type else color or card_type
                 if card_label:
-                    # Display the label on the bounding box (Program 1 behavior)
                     cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.putText(image, f"{card_label} ({confidence_score:.2f})", 
                                 (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                 
-                    # Add the detected label to the list (Program 2 behavior)
                     detected_labels.append(f"{card_label}")
 
-        # If there are detected cards, display them at the bottom of the window (Program 2 behavior)
         if detected_labels:
-            y_position = image.shape[0] - 30  # Start near the bottom of the window
+            y_position = image.shape[0] - 30
             for label in detected_labels:
                 cv2.putText(image, label, (10, y_position),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                y_position -= 30  # Adjust the position for the next label
+                y_position -= 30
 
         return image
 
@@ -73,6 +77,25 @@ class CameraCapture:
                     video_capture.release()
                     return
         video_capture.release()
+
+    def detect_from_image(self, screen):
+        # Open file dialog to select an image
+        file_path = filedialog.askopenfilename(title="Select an Image",
+                                            filetypes=[("Image files", "*.jpg *.jpeg *.png")])
+        if file_path:
+            image = cv2.imread(file_path)
+            image = self.detect_cards(image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = pygame.surfarray.make_surface(cv2.transpose(image))
+            screen.blit(pygame.transform.scale(image, (GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT)), (0, 0))
+            pygame.display.update()
+
+            # Wait for the user to press a key to return to the game screen
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        return
+
 
 class Game:
     def __init__(self):
@@ -170,7 +193,7 @@ class Game:
 
             if upload_button.draw(self.screen, mouse_pos, is_clicked):
                 self.click_sound.play()
-                print("Image Upload selected")
+                self.camera_capture.detect_from_image(self.screen)
 
             if back_button.draw(self.screen, mouse_pos, is_clicked):
                 self.click_sound.play()
