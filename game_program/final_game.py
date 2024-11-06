@@ -21,20 +21,35 @@ class CameraCapture:
 
     def detect_cards(self, image):
         results = self.model(image)
+        detected_labels = []  # List to store all detected card labels
+
         for result in results:
             for box in result.boxes:
                 x1, y1, x2, y2 = map(int, box.xyxy[0])  
                 class_id = int(box.cls.item())
                 confidence_score = float(box.conf.item())
-                
+            
                 color = card_colors.get(class_id)
                 card_type = card_types.get(class_id)
-                
+            
                 card_label = f"{color} {card_type}" if color and card_type else color or card_type
                 if card_label:
+                    # Display the label on the bounding box (Program 1 behavior)
                     cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(image, f"{card_label} ({confidence_score:.2f})", (x1, y1 - 10), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                    cv2.putText(image, f"{card_label} ({confidence_score:.2f})", 
+                                (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                
+                    # Add the detected label to the list (Program 2 behavior)
+                    detected_labels.append(f"{card_label}")
+
+        # If there are detected cards, display them at the bottom of the window (Program 2 behavior)
+        if detected_labels:
+            y_position = image.shape[0] - 30  # Start near the bottom of the window
+            for label in detected_labels:
+                cv2.putText(image, label, (10, y_position),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                y_position -= 30  # Adjust the position for the next label
+
         return image
 
     def capture_video(self, screen):
