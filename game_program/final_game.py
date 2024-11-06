@@ -17,10 +17,9 @@ BUTTON_HOVER_COLOR = (255, 70, 30)
 BUTTON_CLICK_COLOR = (200, 50, 20)
 BUTTON_SHADOW_COLOR = (100, 50, 20)
 
-# Card Types and Colors
-card_types = {5: "0", 6: "1", 7: "2", 8: "3", 9: "4", 10: "5", 11: "6", 12: "7", 13: "8", 14: "9", 16: "Reverse", 17: "Skip", 18: "Wild", 19: "Wild Draw 4"}
+# Cards information according to dataset
+card_types = {0: "+2", 5: "0", 6: "1", 7: "2", 8: "3", 9: "4", 10: "5", 11: "6", 12: "7", 13: "8", 14: "9", 16: "Reverse", 17: "Skip", 18: "Wild", 19: "Wild Draw 4"}
 card_colors = {1: "Black", 2: "Blue", 4: "Green", 15: "Red", 20: "Yellow"}
-
 
 class CameraCapture:
     def __init__(self, model_path):
